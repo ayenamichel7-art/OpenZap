@@ -1,0 +1,200 @@
+services:
+  # App Service (Laravel)
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      args:
+        user: michel
+        uid: 1000
+    image: openzap-app
+    container_name: openzap-app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+    volumes:
+      - ./:/var/www
+    networks:
+      - openzap-network
+    depends_on:
+      - db
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          memory: 128M
+
+  # Laravel Queue Worker (CRITICAL for campaigns)
+  worker:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      args:
+        user: michel
+        uid: 1000
+    container_name: openzap-worker
+    restart: unless-stopped
+    command: php artisan queue:work --tries=3 --timeout=90
+    volumes:
+      - ./:/var/www
+    networks:
+      - openzap-network
+    depends_on:
+      - app
+      - db
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+
+  # Nginx Service (Reverse Proxy + Serving Backend & Frontend)
+  web:
+    image: nginx:alpine
+    container_name: openzap-web
+    restart: unless-stopped
+    ports:
+      - "3500:80" # Web API
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - openzap-network
+    depends_on:
+      - app
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+
+  # Database Service (Postgres 16)
+  db:
+    image: postgres:16-alpine
+    container_name: openzap-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-openzap}
+      POSTGRES_USER: ${DB_USERNAME:-openzap_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-openzap_pass}
+    ports:
+      - "3501:5432" # Database
+    volumes:
+      - openzap-db-data:/var/lib/postgresql/data
+    networks:
+      - openzap-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M
+        reservations:
+          memory: 256M
+
+  # Redis Service (Redis 7)
+  redis:
+    image: redis:7-alpine
+    container_name: openzap-redis
+    restart: unless-stopped
+    ports:
+      - "3502:6379" # Redis
+    networks:
+      - openzap-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+
+  # MinIO - S3 Object Storage
+  minio:
+    image: minio/minio:latest
+    container_name: openzap-minio
+    restart: unless-stopped
+    ports:
+      - "3503:9000" # MinIO API
+      - "3504:9001" # MinIO Console
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-openzap_admin}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-openzap_secret_pass}
+    volumes:
+      - openzap-minio-data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - openzap-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512M
+
+  # Evolution API (WhatsApp Engine)
+  evolution:
+    image: evoapicloud/evolution-api:latest
+    container_name: openzap-evolution
+    restart: unless-stopped
+    environment:
+      - SERVER_TYPE=http
+      - SERVER_PORT=8080
+      - DOCKER_RESTART_POLICY=always
+      - GENERIC_TOKEN=${EVO_TOKEN:-openzap_secret_token}
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://${DB_USERNAME:-openzap_user}:${DB_PASSWORD:-openzap_pass}@db:5432/${DB_DATABASE:-openzap}?schema=public
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis:6379/1
+      - CACHE_REDIS_PREFIX_KEY=evo
+      - CACHE_REDIS_SAVE_INSTANCES=true
+      - REDIS_URI=redis://redis:6379/1
+    ports:
+      - "3505:8080" # Evolution API
+    depends_on:
+      - db
+      - redis
+    networks:
+      - openzap-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2048M # Evolution can be heavy with many instances
+        reservations:
+          memory: 512M
+
+  # Frontend Service (React + Vite)
+  frontend:
+    image: node:22-alpine
+    container_name: openzap-frontend
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3506:3000" # Frontend React
+    command: sh -c "npm install --legacy-peer-deps && npm run dev -- --host --port 3000"
+    environment:
+      - VITE_API_URL=http://localhost:3500/api # Nginx service
+    networks:
+      - openzap-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M # Node npm install can be heavy
+
+networks:
+  openzap-network:
+    driver: bridge
+
+volumes:
+  openzap-db-data:
+    driver: local
+  openzap-minio-data:
+    driver: local

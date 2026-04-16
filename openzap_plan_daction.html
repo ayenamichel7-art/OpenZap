@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan d'Action OpenZap</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary: #0064e0; /* Meta Blue */
+            --bg: #f0f2f5;
+            --text: #1c1e21;
+            --card-bg: #ffffff;
+            --secondary-text: #65676b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 30px;
+        }
+
+        .logo {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+            padding-left: 15px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .highlight {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--secondary-text);
+            border-top: 1px solid var(--bg);
+            padding-top: 20px;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="C:/Users/MICHEL/.gemini/antigravity/brain/36effdc3-3194-4a1a-94bd-bb9db19de351/openzap_logo_professional_v3_duotone_1773175443210.png" alt="OpenZap Logo" class="logo">
+            <h1>Résumé du Plan d'Action - OpenZap</h1>
+            <p>Plateforme SaaS WhatsApp Open-Source & Robuste</p>
+        </header>
+
+        <div class="section">
+            <h2>1. Architecture Technique</h2>
+            <ul>
+                <li><span class="highlight">Backend</span>: Laravel 11 servant d'orchestrateur central (Auth, Facturation, API).</li>
+                <li><span class="highlight">Moteur de Messagerie</span>: Evolution API (Dockerisé) pour une gestion fluide des instances WhatsApp.</li>
+                <li><span class="highlight">Base de Données</span>: Supabase (Postgres) pour la persistance et la scalabilité.</li>
+                <li><span class="highlight">Frontend</span>: React + TypeScript + Vite, avec un design inspiré de <strong>Meta Business Suite</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>2. Expérience Utilisateur & Connectivité</h2>
+            <ul>
+                <li><span class="highlight">Pairing Code</span>: Connexion simplifiée par code à 8 chiffres (plus besoin de scanner le QR code à chaque fois).</li>
+                <li><span class="highlight">Sessions Persistantes</span>: Connexion maintenue tant que l'utilisateur ne se déconnecte pas manuellement.</li>
+                <li><span class="highlight">Application Mobile</span>: Version Flutter (APK direct) pour le suivi des campagnes et le support.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>3. Système de Sécurité & Anti-Ban</h2>
+            <ul>
+                <li><span class="highlight">Le Gardien</span>: Système Laravel limitant les envois automatiques selon l'âge du compte.</li>
+                <li><span class="highlight">Spintax</span>: Validation obligatoire de variations de messages pour simuler un comportement humain.</li>
+                <li><span class="highlight">Heures de Repos</span>: Pause automatique des envois durant la nuit.</li>
+                <li><span class="highlight">Surveillance 24/7</span>: Protection WAF via Cloudflare et audit logs pour chaque action sensible.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>4. Monétisation & Fonctionnalités Premium</h2>
+            <ul>
+                <li><span class="highlight">Bibliothèque de Templates</span>: Modèles de messages optimisés par secteur d'activité.</li>
+                <li><span class="highlight">Facturation</span>: Intégration Native de Stripe ou PayPal pour les abonnements.</li>
+                <li><span class="highlight">Support Intégré</span>: Boutique flottante de support pour discussion directe avec l'admin.</li>
+            </ul>
+        </div>
+
+        <footer>
+            Document généré pour le projet OpenZap - Mars 2026
+        </footer>
+    </div>
+</body>
+</html>
