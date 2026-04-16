@@ -99,4 +99,8 @@ Bien que le code soit visible (Source-Available) dans le cadre d'un portfolio te
 
 Il est **strictement interdit** de copier, cloner, distribuer, modifier ou vendre (en totalité ou en partie) ce code sans l'autorisation écrite formelle de Michel Ayena. Toute tentative d'utilisation commerciale autonome à partir de ces sources constitue une violation de la propriété intellectuelle.
 
+<<<<<<< HEAD
 **© 2026 Michel Ayena. Tous droits réservés.**
+=======
+**© 2026 Michel Ayena. Tous droits réservés.**
+>>>>>>> 83bbb31 (docs: Enrichissement du README.md (Badges, Architecture, Docker, Propriétaire))
