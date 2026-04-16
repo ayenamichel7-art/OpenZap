@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+
+echo "🛡️  Vérification des secrets avant le commit..."
+npx secretlint "**/*"
+
+if [ $? -ne 0 ]; then
+  echo "❌ ERREUR: Des secrets potentiels ont été détectés dans les fichiers à commiter."
+  echo "Vous ne pouvez pas commiter de mots de passe ou tokens."
+  exit 1
+fi
