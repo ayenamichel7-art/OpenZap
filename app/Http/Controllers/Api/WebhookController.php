@@ -61,7 +61,7 @@ class WebhookController extends Controller
 
         // Only process outgoing message confirmations (sent by us)
         if ($fromMe && $messageId) {
-            $message = Message::whereJsonContains('extra->id', $messageId)->first();
+            $message = Message::where('external_id', $messageId)->first();
             if ($message && $message->status === 'pending') {
                 $message->update([
                     'status' => 'sent',
@@ -84,7 +84,7 @@ class WebhookController extends Controller
 
         if (!$id) return;
 
-        $message = Message::whereJsonContains('extra->id', $id)->first();
+        $message = Message::where('external_id', $id)->first();
 
         if ($message) {
             if ($status == 3) {

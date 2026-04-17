@@ -67,12 +67,16 @@ class GuardianService
      */
     public function canSend(WhatsappInstance $instance): bool
     {
-        $todayCount = Message::whereIn(
-                'campaign_id',
-                $instance->campaigns()->select('id')
-            )
-            ->whereDate('sent_at', Carbon::today())
-            ->count();
+        $cacheKey = "instance_send_count_" . $instance->id . "_" . Carbon::today()->toDateString();
+        
+        $todayCount = \Illuminate\Support\Facades\Cache::remember($cacheKey, 30, function() use ($instance) {
+            return Message::whereIn(
+                    'campaign_id',
+                    $instance->campaigns()->select('id')
+                )
+                ->whereDate('sent_at', Carbon::today())
+                ->count();
+        });
 
         return $todayCount < ($instance->daily_limit ?? 50);
     }

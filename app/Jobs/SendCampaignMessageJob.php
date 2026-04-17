@@ -89,6 +89,7 @@ class SendCampaignMessageJob implements ShouldQueue
 
             $this->message->update([
                 'status' => 'sent',
+                'external_id' => $messageId,
                 'sent_at' => now(),
                 'extra' => ['id' => $messageId]
             ]);

@@ -98,6 +98,11 @@ services:
           memory: 1024M
         reservations:
           memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-openzap_user} -d ${DB_DATABASE:-openzap}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Redis Service (Redis 7)
   redis:
@@ -113,6 +118,11 @@ services:
         limits:
           cpus: '0.25'
           memory: 256M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # MinIO - S3 Object Storage
   minio:
@@ -135,6 +145,11 @@ services:
         limits:
           cpus: '0.25'
           memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Evolution API (WhatsApp Engine)
   evolution:

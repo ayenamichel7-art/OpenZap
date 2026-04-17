@@ -20,6 +20,19 @@ yarn-error.log
 /.vscode
 /.docker-compose/override
 
+# Laravel specific
+/storage/app/public
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/testing/*
+!/storage/framework/testing/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+
 # Frontend
 /frontend/node_modules
 /frontend/dist

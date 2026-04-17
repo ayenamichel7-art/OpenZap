@@ -9,6 +9,7 @@ class Message extends Model
     protected $fillable = [
         'campaign_id',
         'contact_id',
+        'external_id',
         'body',
         'status',
         'error_message',

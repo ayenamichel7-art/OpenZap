@@ -26,7 +26,7 @@ class CampaignController extends Controller
                 }
             ])
             ->latest()
-            ->get();
+            ->paginate(10);
     }
 
     public function store(Request $request)

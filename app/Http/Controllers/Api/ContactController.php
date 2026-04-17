@@ -46,20 +46,37 @@ class ContactController extends Controller
             'contacts.*.name' => 'nullable|string'
         ]);
 
-        $imported = 0;
+        $contactsToUpsert = [];
+        $userId = Auth::id();
+
         foreach ($request->contacts as $data) {
             $phone = preg_replace('/[^0-9]/', '', $data['phone']);
             if (empty($phone)) continue;
 
-            Auth::user()->contacts()->firstOrCreate(
-                ['phone' => $phone],
-                ['name' => $data['name'] ?? null, 'tags' => $data['tags'] ?? []]
-            );
-            $imported++;
+            $contactsToUpsert[] = [
+                'user_id' => $userId,
+                'phone' => $phone,
+                'name' => $data['name'] ?? null,
+                'tags' => json_encode($data['tags'] ?? []),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            
+            // Chunking to avoid massive single insert
+            if (count($contactsToUpsert) >= 500) {
+                Contact::upsert($contactsToUpsert, ['user_id', 'phone'], ['name', 'tags', 'updated_at']);
+                $imported += count($contactsToUpsert);
+                $contactsToUpsert = [];
+            }
+        }
+
+        if (!empty($contactsToUpsert)) {
+            Contact::upsert($contactsToUpsert, ['user_id', 'phone'], ['name', 'tags', 'updated_at']);
+            $imported += count($contactsToUpsert);
         }
 
         return response()->json([
-            'message' => "{$imported} contacts imported successfully.",
+            'message' => "{$imported} contacts importés avec succès.",
         ]);
     }
 
@@ -73,8 +90,17 @@ class ContactController extends Controller
         $parsedUrl = parse_url($url);
         $host = $parsedUrl['host'] ?? '';
         
-        if (!str_ends_with($host, 'google.com') && !str_ends_with($host, 'googleusercontent.com')) {
-            return response()->json(['error' => "URL invalide. Seuls les Google Sheets sont autorisés."], 403);
+        $allowedHosts = ['docs.google.com', 'spreadsheets.google.com', 'google.com'];
+        $isSafe = false;
+        foreach ($allowedHosts as $allowedHost) {
+            if ($host === $allowedHost || str_ends_with($host, '.' . $allowedHost)) {
+                $isSafe = true;
+                break;
+            }
+        }
+
+        if (!$isSafe) {
+            return response()->json(['error' => "URL invalide. Seuls les Google Sheets officiels sont autorisés."], 403);
         }
         
         // Convert to export URL
@@ -92,7 +118,8 @@ class ContactController extends Controller
 
             $csv = $response->body();
             $lines = explode("\n", $csv);
-            $count = 0;
+            $contactsToUpsert = [];
+            $userId = Auth::id();
 
             foreach ($lines as $index => $line) {
                 if ($index === 0 || empty(trim($line))) continue; // Skip header/empty
@@ -102,13 +129,28 @@ class ContactController extends Controller
                     $phone = preg_replace('/[^0-9]/', '', $data[0]);
                     if (empty($phone)) continue;
 
-                    Auth::user()->contacts()->firstOrCreate(
-                        ['phone' => $phone],
-                        ['name' => $data[1] ?? null]
-                    );
-                    $count++;
+                    $contactsToUpsert[] = [
+                        'user_id' => $userId,
+                        'phone' => $phone,
+                        'name' => $data[1] ?? null,
+                        'tags' => json_encode([]),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+
+                    if (count($contactsToUpsert) >= 500) {
+                        Contact::upsert($contactsToUpsert, ['user_id', 'phone'], ['name', 'updated_at']);
+                        $count += count($contactsToUpsert);
+                        $contactsToUpsert = [];
+                    }
                 }
             }
+
+            if (!empty($contactsToUpsert)) {
+                Contact::upsert($contactsToUpsert, ['user_id', 'phone'], ['name', 'updated_at']);
+                $count += count($contactsToUpsert);
+            }
+
             return response()->json(['message' => "$count contacts importés depuis Google Sheets."]);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Google Sheets Import Error: " . $e->getMessage());
