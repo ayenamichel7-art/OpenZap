@@ -8,7 +8,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@secretlint/secretlint-rule-preset-recommend": "^11.7.1",
+    "@secretlint/secretlint-rule-preset-recommend": "^12.2.0",
     "@tailwindcss/vite": "^4.0.0",
     "axios": "^1.11.0",
     "concurrently": "^9.0.1",
