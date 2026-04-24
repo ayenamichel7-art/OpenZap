@@ -15,7 +15,7 @@
     "husky": "^9.1.7",
     "laravel-vite-plugin": "^3.0.1",
     "secretlint": "^11.7.1",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.2.4",
     "vite": "^8.0.8"
   }
 }
